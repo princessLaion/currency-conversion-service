@@ -15,3 +15,7 @@ http://localhost:8100/v1/currency-conversion/feign/from/USD/to/PHP/quantity/10
     "totalCalculatedAmount": 560,
     "environment": "8000"
 }
+
+## Eureka Repo
+https://github.com/princessLaion/naming-server
+http://localhost:8761
