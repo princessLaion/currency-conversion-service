@@ -1,6 +1,9 @@
 package com.lrp.currency_conversion_service.controller;
 
 import com.lrp.currency_conversion_service.model.CurrencyConversion;
+import com.lrp.currency_conversion_service.proxy.CurrencyExchangeProxy;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +16,9 @@ import java.util.HashMap;
 
 @RestController
 @RequestMapping("/v1/currency-conversion")
+@RequiredArgsConstructor
 public class CurrencyConversionController {
-//http://localhost:8100/v1/currency-conversion/from/USD/to/PHP/quantity/10
+    private final CurrencyExchangeProxy currencyExchangeProxy;
 
     @GetMapping("/from/{fromCurrency}/to/{toCurrency}/quantity/{qty}")
     public CurrencyConversion calculateExchangeRate(
@@ -40,7 +44,29 @@ public class CurrencyConversionController {
                 currencyConversion.getConversionRate(),
                 qty,
                 qty.multiply(currencyConversion.getConversionRate()),
-                currencyConversion.getEnvironment()
+                currencyConversion.getEnvironment() + " - Rest Template"
         );
     }
+
+    @GetMapping("/feign/from/{fromCurrency}/to/{toCurrency}/quantity/{qty}")
+    public CurrencyConversion calculateExchangeRateUsingFeign(
+            @PathVariable String fromCurrency,
+            @PathVariable String toCurrency,
+            @PathVariable BigDecimal qty) {
+
+        CurrencyConversion currencyConversion =
+                currencyExchangeProxy.calculateExchangeRate(fromCurrency,toCurrency);
+
+        return new CurrencyConversion(
+                currencyConversion.getId(),
+                fromCurrency,
+                toCurrency,
+                currencyConversion.getConversionRate(),
+                qty,
+                qty.multiply(currencyConversion.getConversionRate()),
+                currencyConversion.getEnvironment() + " - Feign"
+        );
+
+    }
+
 }
