@@ -1,6 +1,7 @@
 package com.lrp.currency_conversion_service.configuration;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
@@ -30,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
 public class RestTemplateConfiguration {
 
     @Bean
+    @LoadBalanced //had impact if we use localhost:8080 now
     RestTemplate restTemplate (RestTemplateBuilder builder) {
         return builder.build();
     }

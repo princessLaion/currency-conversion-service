@@ -31,11 +31,47 @@ public class CurrencyConversionController {
         HashMap<String, String> uriVariables = new HashMap<>();
         uriVariables.put("fromCurrency", fromCurrency);
         uriVariables.put("toCurrency", toCurrency);
-
+        //NOT WORKING after we use the LoadBalance for RestTemplate. Please see Eureka section. We use the Eureka application service name now, instead of localhost:8080
         ResponseEntity<CurrencyConversion> responseEntity = restTemplate.getForEntity(
           "http://localhost:8000/v1/currency-exchange/from/{fromCurrency}/to/{toCurrency}",
                 CurrencyConversion.class, uriVariables
         );
+
+        CurrencyConversion currencyConversion = responseEntity.getBody();
+
+        return new CurrencyConversion(
+                currencyConversion.getId(),
+                fromCurrency,
+                toCurrency,
+                currencyConversion.getConversionRate(),
+                qty,
+                qty.multiply(currencyConversion.getConversionRate()),
+                currencyConversion.getEnvironment() + " - Rest Template"
+        );
+    }
+
+
+    @GetMapping("/eureka/from/{fromCurrency}/to/{toCurrency}/quantity/{qty}")
+    public CurrencyConversion calculateExchangeRateEureka(
+            @PathVariable String fromCurrency,
+            @PathVariable String toCurrency,
+            @PathVariable BigDecimal qty) {
+
+        HashMap<String, String> uriVariables = new HashMap<>();
+        uriVariables.put("fromCurrency", fromCurrency);
+        uriVariables.put("toCurrency", toCurrency);
+
+
+        CurrencyConversion responseEntity2 = restTemplate.getForObject(
+                "http://currency-exchange-service/v1/currency-exchange/from/{fromCurrency}/to/{toCurrency}",
+                CurrencyConversion.class, uriVariables
+        );
+
+        ResponseEntity<CurrencyConversion> responseEntity = restTemplate.getForEntity(
+                "http://currency-exchange-service/v1/currency-exchange/from/{fromCurrency}/to/{toCurrency}",
+                CurrencyConversion.class, uriVariables
+        );
+
 
         CurrencyConversion currencyConversion = responseEntity.getBody();
 
